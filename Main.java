@@ -76,6 +76,10 @@ public class Main {
         ImageProc.imagesc(EMOutputImg, reshape(finalLabel,imgDim1,imgDim2),3 , imgDim1, imgDim2);
         System.out.println("EM agorithm finished!");
 
+        File ref=new File("./data/LunarData/Library Spectra/HighCaPyroxene.txt");
+        File wav=new File("./data/LunarData/Library Spectra/HighCaPyroxeneWavelength.txt");
+        File M3wav=new File("./data/LunarData/M3wavelength_1x75.txt");
+
     }
 
     public static int[][] reshape(int[] index,int imgDim1,int imgDim2){
