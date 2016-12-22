@@ -1,3 +1,8 @@
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+
 import java.util.Arrays;
 
 /**
@@ -17,7 +22,7 @@ class Point{
 
 }
 
-public class ContinuumRemoval {
+public class HyperspectralToolbox {
 
     public static double cross(Point O, Point A, Point B) {
         return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
@@ -52,7 +57,7 @@ public class ContinuumRemoval {
         }
     }
 
-    public static final double[] interpLinear(double[] x, double[] y, double[] xi) throws IllegalArgumentException {
+    public static double[] interpLinear(double[] x, double[] y, double[] xi) throws IllegalArgumentException {
 
         if (x.length != y.length) {
             throw new IllegalArgumentException("X and Y must be the same length");
@@ -127,18 +132,18 @@ public class ContinuumRemoval {
         return CR;
     }
 
-    public static double[][] performContinuumRemoval(double[][] data,double[] wavelength,int nData,int nDim){
+    public static double[] performContinuumRemoval(double[] data,double[] wavelength,int nDim){
         Point[] pixel=new Point[nDim];
-        double[][] CRdata=new double[nData][nDim];
+        double[] CRdata=new double[nDim];
 
-        for(int i=0;i<nData;i++){
-            for (int j = 0; j < nDim; j++) {
-                pixel[j]=new Point(wavelength[j],data[i][j]);
+
+            for (int i = 0; i < nDim; i++) {
+                pixel[i]=new Point(wavelength[i],data[i]);
             }
 
             Point[] hull = convexHull(pixel).clone();
-            CRdata[i]=removeContinuum(pixel,hull,nDim);
-        }
+            CRdata=removeContinuum(pixel,hull,nDim);
+
 
         return CRdata;
     }
@@ -167,5 +172,56 @@ public class ContinuumRemoval {
             }
         }
         return CRSdata;
+    }
+
+    public static double[][] SAMIntensityImage(double[][] data,double[] librarySpectra,int nData, int nDim,int imgDim1,int imgDim2)
+    throws IllegalArgumentException{
+        if(data[0].length != librarySpectra.length){
+            throw new IllegalArgumentException("Dimensions of data and library spectra must match");
+        }
+
+        RealMatrix Data=new Array2DRowRealMatrix(data);
+        RealVector LibrarySpectra=new ArrayRealVector(librarySpectra);
+        double[] SAMvec=new double[nData];
+
+        for(int i=0;i<nData;i++){
+            SAMvec[i]=Data.getRowVector(i).cosine(LibrarySpectra);
+        }
+
+        return reshape(SAMvec,imgDim1,imgDim2);
+
+    }
+
+    public static double[] invert(double[] data){
+        for(int i=0;i<data.length;i++){
+            if(data[i]>1){
+                data[i]=1;
+            }
+            else if(data[i]<0){
+                data[i]=0;
+            }
+            data[i]=1-data[i];
+        }
+        return  data;
+    }
+
+    public static int[][] reshape(int[] index,int imgDim1,int imgDim2){
+        int count=0;
+        int[][] classificationMat=new int[imgDim1][imgDim2];
+        for(int j=0;j<imgDim2;j++)
+            for(int i=0;i<imgDim1;i++){
+                classificationMat[i][j]=index[count];count++;
+            }
+        return classificationMat;
+    }
+
+    public static double[][] reshape(double[] index,int imgDim1,int imgDim2){
+        int count=0;
+        double[][] classificationMat=new double[imgDim1][imgDim2];
+        for(int j=0;j<imgDim2;j++)
+            for(int i=0;i<imgDim1;i++){
+                classificationMat[i][j]=index[count];count++;
+            }
+        return classificationMat;
     }
 }

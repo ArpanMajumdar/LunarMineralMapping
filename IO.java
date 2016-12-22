@@ -95,7 +95,7 @@ public class IO {
         return data;
     }
 
-    public static double[] readWavelength(File file,int nDim){
+    public static double[] readDoubleVec(File file,int nDim){
 		Scanner sc;
 		double[] wavelength=new double[nDim];
 		try{

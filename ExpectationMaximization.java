@@ -263,9 +263,6 @@ public class ExpectationMaximization {
 
     }
 
-
-
-
     public static void main(String args[]){
         int nData=150,nDim=4;
 
