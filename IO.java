@@ -113,6 +113,29 @@ public class IO {
 		return wavelength;
 	}
 
+    public static double[][][] readDouble3DMat(File file,int imgDim1,int imgDim2,int bands){
+        Scanner sc;
+        double[][][] dataCube=new double[1500][300][73];
+
+        try{
+            sc=new Scanner(file);
+            sc.useDelimiter(",|\\n");
+
+            for(int j=0;j<imgDim2;j++){
+                for(int i=0;i<imgDim1;i++){
+                    for(int k=0;k<bands;k++){
+                        dataCube[i][j][k]=Double.parseDouble(sc.next());
+                    }
+                }
+            }
+        }
+        catch(FileNotFoundException e){
+            e.printStackTrace();
+        }
+
+        return dataCube;
+    }
+
 	public static void writeData(double[][] data,int nData,int nDim,String filepath){
         File file=new File(filepath);
         PrintWriter writer;

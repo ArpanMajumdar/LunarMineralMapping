@@ -1,4 +1,4 @@
-package hyperspectral.workflow;
+
 
 // Java program to fnd number of islands using Disjoint
 // Set data structure.

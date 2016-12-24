@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hyperspectral.workflow;
 
-import static hyperspectral.workflow.ImageProc.imagesc;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -18,30 +17,6 @@ import org.apache.commons.math3.stat.StatUtils;
  * @author Arpan
  */
 public class SpatialInformationExtraction {
-    
-    public static double[][][] readSpectralCube(File file,int imgDim1,int imgDim2,int bands){
-        Scanner sc;
-        double[][][] dataCube=new double[1500][300][73];        
-        
-        try{
-            sc=new Scanner(file);
-            sc.useDelimiter(",|\\n");
-            
-            for(int j=0;j<imgDim2;j++){
-                for(int i=0;i<imgDim1;i++){
-                    for(int k=0;k<bands;k++){
-                        dataCube[i][j][k]=Double.parseDouble(sc.next());
-                    }
-                }
-            }            
-        }
-        catch(FileNotFoundException e){
-            e.printStackTrace();
-        }
-        
-        return dataCube;
-    }
-    
     public static double[][] SAMmeanWindowFilter(double[][][] dataCube,int imgDim1,int imgDim2,int bands){
         ArrayList<ArrayRealVector> arrVecList;
         ArrayRealVector refVec=null;
@@ -75,7 +50,7 @@ public class SpatialInformationExtraction {
                
                 for(int k=0;k<arrVecList.size();k++){
                     neighbourVec=arrVecList.get(k);
-                    SAMangle[k]=Math.toDegrees(Math.acos(refVec.dotProduct(neighbourVec)/(refVec.getNorm()*neighbourVec.getNorm())));
+                    SAMangle[k]=neighbourVec.cosine(refVec);
                 }
                 
                 SAMsimilarityImg[i][j]=StatUtils.mean(SAMangle);
@@ -115,36 +90,20 @@ public class SpatialInformationExtraction {
         int imgDim1=1500,
             imgDim2=300,
             bands=73;
-        
-        String root="J:\\Java programs\\Hyperspectral Workflow\\Data files\\";
-        File file=new File(root+"Data Cube.txt");
-        double[][][] dataCube=readSpectralCube(file,imgDim1,imgDim2,bands);
+
+        File file=new File("./data/LunarData/CRSdata_450000x73_MATLAB.txt");
+        double[][][] dataCube=IO.readDouble3DMat(file,imgDim1,imgDim2,bands);
         double[][] SAMsimilarityImg=SAMmeanWindowFilter(dataCube,imgDim1,imgDim2,bands);
         double[][] avgSAMsimilarityImg1=meanFilter(SAMsimilarityImg,imgDim1,imgDim2,bands);
         double[][] avgSAMsimilarityImg2=meanFilter(avgSAMsimilarityImg1,imgDim1,imgDim2,bands);
+        double[][] avgSAMsimilarityImg3=meanFilter(avgSAMsimilarityImg2,imgDim1,imgDim2,bands);
+
         
-        
-        for(int i=0;i<imgDim1;i++){
-            System.out.print(i+" : ");
-            for(int j=0;j<imgDim2;j++){
-                System.out.print(avgSAMsimilarityImg2[i][j]+"\t");
-            }
-            System.out.println();
-        }
-        
-        int[][] thresholdedImg=new int[imgDim1][imgDim2];
-        
-        for(int i=0;i<imgDim1;i++){
-            for(int j=0;j<imgDim2;j++){
-                if(avgSAMsimilarityImg2[i][j]>0.0 && avgSAMsimilarityImg2[i][j]<9.0)
-                    thresholdedImg[i][j]=1;
-                else
-                    thresholdedImg[i][j]=0;
-            }
-        }    
-            
-        File binaryConnCompImg=new File(root+"BinaryConnCompImg.png");
-        imagesc(binaryConnCompImg,thresholdedImg,2,imgDim1,imgDim2);
+        IO.writeData(SAMsimilarityImg,imgDim1,imgDim2,"./data/LunarData/SAMsimilarityImg.txt");
+        IO.writeData(avgSAMsimilarityImg1,imgDim1,imgDim2,"./data/LunarData/avgSAMsimilarityImg1.txt");
+        IO.writeData(avgSAMsimilarityImg2,imgDim1,imgDim2,"./data/LunarData/avgSAMsimilarityImg2.txt");
+        IO.writeData(avgSAMsimilarityImg3,imgDim1,imgDim2,"./data/LunarData/avgSAMsimilarityImg3.txt");
+
         
     }    
 }
