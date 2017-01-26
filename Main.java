@@ -17,14 +17,14 @@ public class Main {
         double[][] data;double[] M3wavelength;
 
         System.out.println("Reading data...");
-        File file_in=new File("./data/LunarData/RawData_450000x75.txt");
+        File dataFile=new File("./data/LunarData/RawData_450000x75.txt");
         File wavFile=new File("./data/LunarData/M3wavelength_1x75.txt");
 
         //Read data from binary file
         //data=IO.readBinaryData(file_in,nData,nDim);
 
         //Read data from text file
-        data=IO.readDoubleMat(file_in,nData,nDim);
+        data=IO.readDoubleMat(dataFile,nData,nDim);
         M3wavelength=IO.readDoubleVec(wavFile,nDim);
         //double[][] CRdata=data;
         System.out.println("Reading done!");
@@ -72,8 +72,12 @@ public class Main {
             if(init[i]==-1){
                 EMinit[i]=(int)(Math.random()*3);
             }
+            else{
+                EMinit[i]=init[i];
+            }
         }
 
+        //Running Expectation-Maximization algorithm
         System.out.println("Running Expectation-Maximization algorithm...");
         int[] finalLabel=ExpectationMaximization.EM(CRSdata,EMinit,nData,nDim,3);
         IO.display(finalLabel,"Final Label",nData);

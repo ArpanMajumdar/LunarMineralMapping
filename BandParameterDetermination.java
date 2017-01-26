@@ -74,7 +74,7 @@ public class BandParameterDetermination {
 
 
 
-        scaledWavelength=scale(wavelength);
+        //scaledWavelength=scale(wavelength);
 
         //Initialize band parameters
         double[] bandStrength1000nm=new double[nData];
@@ -90,10 +90,10 @@ public class BandParameterDetermination {
         double[] bandCurvature=new double[nData];
         double[] bandTilt=new double[nData];
 
-        double[] wavelengthRegion1000nm=Arrays.copyOfRange(scaledWavelength, 0, 35);
-        double[] wavelengthRegion2000nm=Arrays.copyOfRange(scaledWavelength, 35, 73);
+        double[] wavelengthRegion1000nm=Arrays.copyOfRange(wavelength, 0, 35);
+        double[] wavelengthRegion2000nm=Arrays.copyOfRange(wavelength, 35, 73);
 
-        double[][] featureVector=new double[nData][13];
+        double[][] featureVector=new double[nData][8];
 
         for(int i=0;i<nData;i++){
             //Calculate band center
@@ -105,8 +105,8 @@ public class BandParameterDetermination {
             bandStrength2000nm[i]=region2000nm[i][bandCenterIndex2000nm[i]-35];
 
             //Calculate band center index
-            bandCenter1000nm[i]=scaledWavelength[bandCenterIndex1000nm[i]];
-            bandCenter2000nm[i]=scaledWavelength[bandCenterIndex2000nm[i]];
+            bandCenter1000nm[i]=wavelength[bandCenterIndex1000nm[i]];
+            bandCenter2000nm[i]=wavelength[bandCenterIndex2000nm[i]];
 
             //Calculate band area
             bandArea1000nm[i]=trapezoidalIntegration(wavelengthRegion1000nm,region1000nm[i]);
@@ -125,8 +125,11 @@ public class BandParameterDetermination {
             featureVector[i][5]=bandArea1000nm[i];
             featureVector[i][6]=bandArea2000nm[i];
             featureVector[i][7]=bandAreaRatio[i];
+
+            /*
             featureVector[i][8]=bandCenterIndex1000nm[i];
             featureVector[i][9]=bandCenterIndex2000nm[i];
+
 
             double CRdata750nm=(data[i][6]);
             double CRdata900nm=(data[i][13]+data[i][14])/2;
@@ -143,66 +146,12 @@ public class BandParameterDetermination {
             featureVector[i][12]=CRdata900nm/CRdata1000nm;
 
             //
+            */
 
         }
 
-        /*
-        //Print 1000 nm region
-        System.out.println("\n1000 nm region:");
-        for(int i=0;i<100;i++){
-            System.out.print(i+" : ");
-            for(int j=0;j<35;j++){
-                System.out.print(region1000nm[i][j]+"\t");
-            }
-            System.out.println();
-        }
 
-
-        //Print 2000nm region
-        System.out.println("\n2000 nm region:");
-        for(int i=0;i<100;i++){
-            System.out.print(i+" : ");
-            for(int j=0;j<38;j++){
-                System.out.print(region2000nm[i][j]+"\t");
-            }
-            System.out.println();
-        }
-
-        //Print wavelength
-        System.out.println("Wavelength:");
-        for(int i=0;i<nDim;i++){
-            System.out.print(wavelength[i]+"\t");
-        }
-        System.out.println();
-
-        //Print scaled wavelength
-        System.out.println("Scaled Wavelength:");
-        for(int i=0;i<nDim;i++){
-            System.out.print(scaledWavelength[i]+"\t");
-        }
-        System.out.println();
-        */
-        File bandParameters=new File("./data/BandParameters.txt");
-        PrintWriter writer;
-
-        try{
-
-            writer=new PrintWriter(bandParameters);
-            //System.out.println("Feature Vector:");
-            for(int i=0;i<nData;i++){
-                //System.out.print(i+" : ");
-                for(int j=0;j<13;j++){
-                    //System.out.print(featureVector[i][j]+"\t");
-                    writer.print(featureVector[i][j]+",");
-                }
-                //System.out.println();
-                writer.println();
-            }
-            writer.close();
-        }
-        catch(FileNotFoundException e){
-            e.printStackTrace();
-        }
+        //IO.writeData(featureVector,nData,8,"J:\\LUNAR MINERAL MAPPING\\IISC\\BandParameterFeatureVector.txt");
 
 
         return featureVector;

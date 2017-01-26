@@ -31,14 +31,15 @@ public class ExpectationMaximization {
         //IO.display(X,"X");
 
         RealMatrix R=initialization(nData,label,init);
+        //IO.display(label,"Label",nData);
         //IO.display(R,"R");
 
 
         for(int i=1;i<maxitr;i++){
-            System.out.print("itr="+i+"\t"+":");
+            //System.out.print("itr="+i+"\t"+":");
 
             label=getLabels(R,nData,init);
-            IO.display(label,"Label",nData);
+            //IO.display(label,"Label",nData);
 
             Model model=maximization(X,R,nData,nDim,init);
             R=expectation(X,model,nData,nDim,init,llh,i);
@@ -151,7 +152,8 @@ public class ExpectationMaximization {
             RealMatrix Sigma=Xo.transpose().preMultiply(Xo);
             for(int j=0;j<nDim;j++){
                 for(int l=0;l<nDim;l++){
-                    Sigma.setEntry(j,l,(Sigma.getEntry(j,l)/nk.getEntry(i))+1E-6);
+                    Sigma.setEntry(j,l,(Sigma.getEntry(j,l)/nk.getEntry(i)));
+                    //Sigma.setEntry(j,l,(Sigma.getEntry(j,l)/nk.getEntry(i))+1E-6);
                 }
             }
 

@@ -2,8 +2,12 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.stat.StatUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by ARPAN on 12-11-2016.
@@ -223,5 +227,100 @@ public class HyperspectralToolbox {
                 classificationMat[i][j]=index[count];count++;
             }
         return classificationMat;
+    }
+
+    public static double[][] normalize(double[][] data,int nData,int nDim){
+        RealMatrix X=new Array2DRowRealMatrix(data);
+
+        for(int i=0;i<nDim;i++){
+            X.setColumnVector(i,new ArrayRealVector(StatUtils.normalize(X.getColumnVector(i).toArray())));
+        }
+        return X.getData();
+    }
+
+    public static int[] labelCount(int[] label,int nClass){
+        int[] freq=new int[nClass];
+
+        for(int i=0;i<label.length;i++){
+            freq[label[i]]++;
+        }
+
+        System.out.println("Class\tCount\tPercent");
+        for(int i=0;i<nClass;i++){
+            System.out.println(i+"\t"+freq[i]+"\t"+((double)freq[i]/label.length)*100);
+        }
+        return freq;
+    }
+
+    public static  double[][] generateTrainingData(double[][] data,int nData,int nDim,int[] label,int nClass,int[] membercount,int[] shuffledClassLabel){
+        if(membercount.length!=nClass){
+            System.out.println("Enter correct number of classes in the membercount array...");
+            System.exit(-1);
+        }
+
+        int[] freq=labelCount(label,nClass);
+        for(int i=0;i<nClass;i++){
+            if(membercount[i]>freq[i]){
+                System.out.println("Training data required exceeds the class "+i+" frequency...");
+                System.exit(-1);
+            }
+        }
+
+        double[][][] classData=new double[nClass][][];
+        for(int i=0;i<nClass;i++){
+            classData[i]=new double[freq[i]][nDim];
+        }
+
+        int[] count=new int[nClass];
+        for(int i=0;i<nData;i++){
+            classData[label[i]][count[label[i]]]=data[i];
+            count[label[i]]++;
+        }
+
+
+        int[] index;
+        int labelcount=0;
+        int trainingDataCount=0;
+        for(int i=0;i<nClass;i++){
+            trainingDataCount+=membercount[i];
+        }
+
+        double[][] shuffledClassData=new double[trainingDataCount][nDim];
+
+        for(int i=0;i<nClass;i++){
+            index=randperm(freq[i]);
+            for(int j=0;j<membercount[i];j++){
+                shuffledClassData[labelcount]=classData[i][index[j]];
+                shuffledClassLabel[labelcount]=i;
+                labelcount++;
+            }
+        }
+
+        return shuffledClassData;
+    }
+
+    // Implementing Fisher–Yates shuffle
+    private static void shuffleArray(int[] ar)
+    {
+        // If running on Java 6 or older, use `new Random()` on RHS here
+        Random rnd = ThreadLocalRandom.current();
+        for (int i = ar.length - 1; i > 0; i--)
+        {
+            int index = rnd.nextInt(i + 1);
+            // Simple swap
+            int a = ar[index];
+            ar[index] = ar[i];
+            ar[i] = a;
+        }
+    }
+
+    public static int[] randperm(int n){
+        int[] arr=new int[n];
+        for(int i=0;i<n;i++){
+            arr[i]=i;
+        }
+
+        shuffleArray(arr);
+        return arr;
     }
 }
